@@ -32,18 +32,20 @@ Servo servo5;
 #define servo5_angle_max 180
 #define servo5_angle_init 90
 
-#define ultrasonic_pin1 3
-#define ultrasonic_pin2 10
+#define ultrasonic_trig 10
+#define ultrasonic_echo 3
 
 int servo1Pos, servo2Pos, servo3Pos, servo4Pos, servo5Pos, servo6Pos; // 當前角度
 int servo1PPos, servo2PPos, servo3PPos, servo4PPos, servo5PPos, servo6PPos; // 之前角度
 int distance;
 bool flag = 0;
 
-float ultrasonic_distance_9_10();
+float ultrasonic_distance();
 
 
 void setup() {
+   pinMode(ultrasonic_trig, OUTPUT);
+   pinMode(ultrasonic_echo, INPUT);
 
    Serial.begin(9600);
    servo1.attach(sevo1_pin);
@@ -54,7 +56,7 @@ void setup() {
 
    delay(20);
 
-   servo1PPos = servo1_angle_init;
+   /*servo1PPos = servo1_angle_init;
    servo1.write(servo1PPos);
    servo2PPos = servo2_angle_init;
    servo2.write(servo2PPos);
@@ -63,26 +65,25 @@ void setup() {
    servo4PPos = servo4_angle_init;
    servo4.write(servo4PPos);
    servo5PPos = servo5_angle_init;
-   servo5.write(servo5PPos);
+   servo5.write(servo5PPos);*/
 
-   pinMode(ultrasonic_pin1, OUTPUT);
-   pinMode(ultrasonic_pin2, INPUT);
+
 }
 
 void loop() {
-   distance = ultrasonic_distance_9_10();
+   distance = ultrasonic_distance();
    delay(20);
-   if (distance >= 10) {
+   if (distance <= 10) {
       if (flag == 0) {
-         servo3.write(0);
+         servo3.write(30);
          delay(100);
-         servo4.write(0);
+         servo4.write(30);
          flag = 1;
       }
       else{
-         servo3.write(180);
+         servo3.write(120);
          delay(100);
-         servo4.write(180);
+         servo4.write(120);
          flag = 0;
       }
       delay(1000);
@@ -90,14 +91,14 @@ void loop() {
 
 }
 
-float ultrasonic_distance_9_10() {
-   digitalWrite(3, LOW);
-   digitalWrite(10, LOW);
-   delayMicroseconds(5);
-   digitalWrite(3, HIGH);
+float ultrasonic_distance() {
+   long duration, distance_cm;
+   digitalWrite(ultrasonic_trig, LOW);
+   delayMicroseconds(2);
+   digitalWrite(ultrasonic_trig, HIGH);
    delayMicroseconds(10);
-   digitalWrite(3, LOW);
-   unsigned long sonic_duration = pulseIn(10, HIGH);
-   float distance_cm = (sonic_duration / 2.0) / 29.1;
+   digitalWrite(ultrasonic_trig, LOW);
+   duration = pulseIn(ultrasonic_echo, HIGH);
+   distance_cm = (duration / 2) / 29.1;
    return distance_cm;
 }
